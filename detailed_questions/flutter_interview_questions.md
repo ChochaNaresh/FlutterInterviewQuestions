@@ -618,6 +618,61 @@ var obj = "Hello"; // (obj is inferred as String)
 
 ---
 
+---
+
+### Easy 41. What is the purpose of using the const constructor in Flutter widgets?
+
+In Flutter, the `const` keyword is used to create compile-time constants. When applied to a widget constructor, it tells the compiler that this widget's configuration is static and cannot change at runtime.
+
+#### How it works under the hood
+During a rebuild, Flutter walks the widget tree. When it hits a widget marked as `const`, it detects that the configuration is identical, completely skips calling its `build` method, and reuses the exact same widget instance in memory. This skips rendering calculations for that entire subtree.
+
+#### Why use it
+- **Reduced CPU Cycles:** Skips execution of the `build` method for static parts of the UI.
+- **Lower Memory Allocation:** Reuses existing instances instead of allocating and garbage-collecting new widgets on every frame.
+
+```dart
+// Good practice: uses compile-time constants for static elements
+const Text('Welcome to Flutter', style: TextStyle(color: Colors.blue));
+```
+
+[Back to Index](../flutter_interview_questions.md#easy-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#easy-41-what-is-the-purpose-of-using-the-const-constructor-in-flutter-widgets)
+
+---
+
+### Easy 42. How do you add and use custom fonts or assets in a Flutter application?
+
+To add and use custom fonts or static assets (like images, SVGs, or JSON files) in a Flutter application, you must register them in the project configuration.
+
+#### Implementation Steps
+1. **Place the files in your project directory**: Create an `assets/` or `assets/fonts/` directory at the root of your project.
+2. **Register them in `pubspec.yaml`**: Add the asset paths and define custom font families under the `flutter` section.
+   ```yaml
+   flutter:
+     assets:
+       - assets/images/logo.png
+       - assets/data.json
+
+     fonts:
+       - family: CustomFont
+         fonts:
+           - asset: assets/fonts/CustomFont-Regular.ttf
+           - asset: assets/fonts/CustomFont-Bold.ttf
+             weight: 700
+   ```
+3. **Load them in Dart code**:
+   ```dart
+   // Load asset image
+   Image.asset('assets/images/logo.png')
+
+   // Apply custom font
+   Text(
+     'Styled Text',
+     style: TextStyle(fontFamily: 'CustomFont', fontWeight: FontWeight.bold),
+   )
+   ```
+
+[Back to Index](../flutter_interview_questions.md#easy-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#easy-42-how-do-you-add-and-use-custom-fonts-or-assets-in-a-flutter-application)
 
 ## Medium Questions
 
@@ -1491,6 +1546,79 @@ class Dog implements Animal {
 
 ---
 
+---
+
+### Medium 42. What is RepaintBoundary and how does it improve repaint performance?
+
+`RepaintBoundary` is a widget that wraps a subtree to isolate its paint operations from the rest of the application.
+
+#### The Problem
+Normally, when a widget in Flutter requests a repaint, its parent and siblings may also repaint because they share the same rendering layer.
+
+#### The Solution
+By wrapping a widget in a `RepaintBoundary`, you tell the engine to paint that child subtree onto its own separate display list and layer.
+- **When to use it:** Wrap widgets that update very frequently (like custom animations, canvas drawings, or video players) to prevent them from causing the rest of the static screen to repaint.
+- **Performance Trade-off:** Do not overuse it, as creating separate layers increases GPU memory usage and layer compositing overhead.
+
+```dart
+RepaintBoundary(
+  child: CustomAnimatedWidget(),
+)
+```
+
+[Back to Index](../flutter_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#medium-42-what-is-repaintboundary-and-how-does-it-improve-repaint-performance)
+
+---
+
+### Medium 43. Differentiate between InheritedWidget, InheritedNotifier, and InheritedModel.
+
+All three are low-level widgets used for propagating state down the widget tree, but they offer different levels of rebuild optimization.
+
+#### Comparison
+1. **`InheritedWidget`**: The base class. When its data changes, all descendant widgets that depend on it are rebuilt entirely.
+2. **`InheritedNotifier`**: An extension of `InheritedWidget` that accepts a `Listenable` (like `ChangeNotifier` or `ValueNotifier`). Descendants automatically rebuild whenever the notifier triggers, removing the need for `setState` in a parent.
+3. **`InheritedModel`**: A variant of `InheritedWidget` that allows descendants to depend on specific aspects of the state. If only aspect "A" changes, widgets depending on aspect "B" are not rebuilt.
+
+```dart
+// InheritedModel aspect subscription example
+final color = InheritedModel.inheritFrom<ThemeModel>(context, aspect: 'color')?.color;
+```
+
+[Back to Index](../flutter_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#medium-43-differentiate-between-inheritedwidget-inheritednotifier-and-inheritedmodel)
+
+---
+
+### Medium 44. What is State Restoration in Flutter and how is it implemented?
+
+State Restoration allows an application to save its UI state when the operating system kills it in the background to reclaim memory. When the user reopens the app, Flutter restores the previous state so they can resume their work.
+
+#### Implementation
+1. Add a `restorationScopeId` to your `MaterialApp`.
+2. Mix in `RestorationMixin` to your stateful widget's State class.
+3. Provide a unique `restorationId` for the widget.
+4. Replace standard variable types with restoration types (e.g., `RestorableInt` instead of `int`).
+
+```dart
+class _MyState extends State<MyWidget> with RestorationMixin {
+  final RestorableInt _counter = RestorableInt(0);
+
+  @override
+  String? get restorationId => 'counter_restoration_id';
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_counter, 'counter_value');
+  }
+
+  @override
+  void dispose() {
+    _counter.dispose();
+    super.dispose();
+  }
+}
+```
+
+[Back to Index](../flutter_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#medium-44-what-is-state-restoration-in-flutter-and-how-is-it-implemented)
 
 ## Hard Questions
 
@@ -1857,3 +1985,60 @@ lazyLib.myFunction();
 [Back to Index](../flutter_interview_questions.md) &nbsp;&nbsp;/&nbsp;&nbsp; [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#hard-19-what-is-code-splitting-in-flutter-and-how-does-it-help)
 
 ---
+
+---
+
+### Hard 20. Explain the Impeller rendering engine and how it solves shader compilation jank compared to Skia.
+
+Impeller is Flutter's modern graphics rendering engine, replacing Skia as the default renderer.
+
+#### The Problem with Skia
+Skia compiled graphics shaders dynamically at runtime (Just-In-Time) when an animation was shown for the first time. This CPU-heavy compilation took time, causing dropped frames (known as **Shader Compilation Jank**).
+
+#### The Impeller Solution
+- **Ahead-Of-Time (AOT) Shader Compilation**: Impeller pre-compiles a fixed set of shaders during the application build phase. No shaders are compiled at runtime.
+- **Modern GPU APIs**: Built specifically for Flutter, Impeller utilizes Vulkan (Android) and Metal (iOS) directly, bypassing legacy OpenGL abstractions.
+- **Concurrency**: Impeller distributes rendering tasks across multiple CPU cores, ensuring smooth animations from the very first frame.
+
+[Back to Index](../flutter_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#hard-20-explain-the-impeller-rendering-engine-and-how-it-solves-shader-compilation-jank-compared-to-skia)
+
+---
+
+### Hard 21. How does WebAssembly (Wasm) compile-target improve performance for Flutter Web?
+
+Historically, Flutter Web applications compiled to JavaScript. With stable WebAssembly (Wasm) target support, Dart compiles directly to Wasm instructions.
+
+#### Key Improvements
+- **Execution Speed**: Wasm code executes much faster than JavaScript because it is in a low-level binary format, avoiding JavaScript parsing and compilation overhead.
+- **Garbage Collection (GC)**: Flutter Web utilizes the browser's native garbage collector, which reduces garbage collection overhead and prevents memory leak jank.
+- **Smoother Rendering**: Combined with CanvasKit, Wasm delivers complex animations and scrolling at a steady 60fps without lag.
+
+[Back to Index](../flutter_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#hard-21-how-does-webassembly-wasm-compile-target-improve-performance-for-flutter-web)
+
+---
+
+### Hard 22. What is Dart FFI (Foreign Function Interface) and when should it be used in Flutter?
+
+Dart FFI (Foreign Function Interface) allows Dart code to call native functions written in C, C++, Rust, or Go directly without going through Platform Channels.
+
+#### Comparison with Platform Channels
+- **Performance**: Platform channels require message serialization and communication across threads, which introduces overhead. FFI calls are direct, synchronous, and execute with zero-copy memory overhead.
+- **Synchronous Execution**: FFI allows synchronous return values, whereas platform channels are inherently asynchronous.
+
+#### Use Cases
+- Calling high-performance native libraries (e.g., SQLite, TensorFlow, custom image processing).
+- Integrating existing non-Dart system libraries directly.
+
+```dart
+import 'dart:ffi' as ffi;
+
+final dylib = ffi.DynamicLibrary.open('libnative.so');
+final int Function(int, int) nativeAdd = dylib
+    .lookup<ffi.NativeFunction<ffi.Int32 Function(ffi.Int32, ffi.Int32)>>('add')
+    .asFunction();
+
+final result = nativeAdd(10, 20);
+```
+
+[Back to Index](../flutter_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#hard-22-what-is-dart-ffi-foreign-function-interface-and-when-should-it-be-used-in-flutter)
+

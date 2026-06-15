@@ -408,6 +408,21 @@ Condensed 1-4 sentence answers for last-minute review.
 
 ---
 
+---
+
+### Easy 41. What is the purpose of using the const constructor in Flutter widgets?
+
+*The `const` keyword in widget constructors creates compile-time constants. During a rebuild, Flutter completely skips rebuilding the widget and its entire subtree, reusing the existing instance to reduce CPU usage and memory allocation.*
+
+[Back to Index](../flutter_interview_questions.md#easy-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#easy-41-what-is-the-purpose-of-using-the-const-constructor-in-flutter-widgets)
+
+---
+
+### Easy 42. How do you add and use custom fonts or assets in a Flutter application?
+
+*To use custom fonts or assets, place the files in a project folder, register their paths under the `assets` or `fonts` key in the `pubspec.yaml` file, and refer to them using `Image.asset()` or by setting the `fontFamily` property in `TextStyle`.*
+
+[Back to Index](../flutter_interview_questions.md#easy-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#easy-42-how-do-you-add-and-use-custom-fonts-or-assets-in-a-flutter-application)
 
 ## Medium Questions
 
@@ -821,6 +836,29 @@ Condensed 1-4 sentence answers for last-minute review.
 
 ---
 
+---
+
+### Medium 42. What is RepaintBoundary and how does it improve repaint performance?
+
+*A `RepaintBoundary` creates a separate rendering layer for its child subtree. This isolates the repaint cycles, preventing frequent repaints of that subtree from forcing repaints of static parent and sibling widgets, improving rendering performance.*
+
+[Back to Index](../flutter_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#medium-42-what-is-repaintboundary-and-how-does-it-improve-repaint-performance)
+
+---
+
+### Medium 43. Differentiate between InheritedWidget, InheritedNotifier, and InheritedModel.
+
+*`InheritedWidget` rebuilds all dependent descendant widgets on any state change. `InheritedNotifier` binds to a `Listenable` to automate rebuilds when events occur. `InheritedModel` allows descendants to subscribe to specific aspects, avoiding rebuilds when unrelated fields change.*
+
+[Back to Index](../flutter_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#medium-43-differentiate-between-inheritedwidget-inheritednotifier-and-inheritedmodel)
+
+---
+
+### Medium 44. What is State Restoration in Flutter and how is it implemented?
+
+*State Restoration saves the app's UI state when killed by the OS in the background. It is implemented by assigning a `restorationScopeId` to `MaterialApp`, mixing in `RestorationMixin` in stateful widgets, and using restorable properties like `RestorableInt`.*
+
+[Back to Index](../flutter_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#medium-44-what-is-state-restoration-in-flutter-and-how-is-it-implemented)
 
 ## Hard Questions
 
@@ -1013,3 +1051,28 @@ Condensed 1-4 sentence answers for last-minute review.
 [Back to Index](../flutter_interview_questions.md) &nbsp;&nbsp;/&nbsp;&nbsp; [Detailed Guide](../detailed_questions/flutter_interview_questions.md#hard-19-what-is-code-splitting-in-flutter-and-how-does-it-help)
 
 ---
+
+---
+
+### Hard 20. Explain the Impeller rendering engine and how it solves shader compilation jank compared to Skia.
+
+*Impeller is Flutter's rendering engine that eliminates shader compilation jank by pre-compiling shaders during the build phase (AOT) rather than compiling them dynamically at runtime (JIT) like Skia did. It also directly leverages modern Vulkan and Metal APIs.*
+
+[Back to Index](../flutter_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#hard-20-explain-the-impeller-rendering-engine-and-how-it-solves-shader-compilation-jank-compared-to-skia)
+
+---
+
+### Hard 21. How does WebAssembly (Wasm) compile-target improve performance for Flutter Web?
+
+*Wasm target compiles Dart code into a low-level binary format, enabling near-native execution speed in web browsers. It eliminates JS parsing lag, utilizes native browser garbage collection, and ensures smooth CanvasKit rendering performance.*
+
+[Back to Index](../flutter_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#hard-21-how-does-webassembly-wasm-compile-target-improve-performance-for-flutter-web)
+
+---
+
+### Hard 22. What is Dart FFI (Foreign Function Interface) and when should it be used in Flutter?
+
+*Dart FFI allows Dart code to call native C, C++, or Rust functions directly and synchronously. It bypasses Platform Channels entirely, eliminating message serialization overhead, making it ideal for high-performance libraries or system integrations.*
+
+[Back to Index](../flutter_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#hard-22-what-is-dart-ffi-foreign-function-interface-and-when-should-it-be-used-in-flutter)
+

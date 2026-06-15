@@ -158,6 +158,55 @@ String s2 = "It's Dart"; // No escaping needed
 
 ---
 
+---
+
+### Easy 11. What is the cascade operator (..) in Dart and how does it help write cleaner code?
+
+The cascade operator (`..` and `?..`) allows you to make a sequence of operations on the same object. This saves you from creating temporary variables or repeating the object's name across multiple lines.
+
+#### Example without Cascade
+```dart
+var paint = Paint();
+paint.color = Colors.black;
+paint.strokeCap = StrokeCap.round;
+paint.strokeWidth = 5.0;
+```
+
+#### Example with Cascade
+```dart
+var paint = Paint()
+  ..color = Colors.black
+  ..strokeCap = StrokeCap.round
+  ..strokeWidth = 5.0;
+```
+
+If the object can be null, use the null-aware cascade operator (`?..`):
+```dart
+paint?..color = Colors.red
+     ..strokeWidth = 2.0;
+```
+
+[Back to Index](../dart_interview_questions.md#easy-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#easy-11-what-is-the-cascade-operator-in-dart-and-how-does-it-help-write-cleaner-code)
+
+---
+
+### Easy 12. Explain the spread operator (...) and null-aware spread operator (...?) in Dart collections.
+
+The spread operator (`...`) provides a clean way to insert multiple elements from one collection into another collection.
+
+#### Examples
+```dart
+var list1 = [1, 2, 3];
+var list2 = [0, ...list1, 4]; // Result: [0, 1, 2, 3, 4]
+```
+
+If the collection being spread might be null, using `...` will throw a runtime exception. To prevent this, use the null-aware spread operator (`...?`):
+```dart
+List<int>? list1;
+var list2 = [0, ...?list1, 4]; // Result: [0, 4] (no exception thrown)
+```
+
+[Back to Index](../dart_interview_questions.md#easy-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#easy-12-explain-the-spread-operator-and-null-aware-spread-operator-in-dart-collections)
 
 ## Medium Questions
 
@@ -340,6 +389,58 @@ print(user.$1); // 1
 
 ---
 
+---
+
+### Medium 13. What are class modifiers in Dart 3 (such as base, interface, final, sealed) and how do they control inheritance?
+
+Dart 3 introduced class modifiers to give developers control over how classes can be inherited, implemented, or instantiated outside their declaring library.
+
+#### Modifiers
+- **`base`**: Allows subclasses to extend (`extends`) the class but blocks them from implementing (`implements`) its interface.
+- **`interface`**: Allows other classes to implement (`implements`) the class's interface but blocks extension (`extends`).
+- **`final`**: Blocks both inheritance and implementation outside of the library. It can only be instantiated.
+- **`sealed`**: Blocks external inheritance, implementation, and instantiation. Subclasses must be defined in the same file, allowing the compiler to perform exhaustiveness checks in switch statements.
+
+[Back to Index](../dart_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#medium-13-what-are-class-modifiers-in-dart-3-and-how-do-they-control-inheritance)
+
+---
+
+### Medium 14. What is the difference between a sealed class and an enum in Dart?
+
+While both `sealed` classes and `enum` types restrict the possible subtypes or values to a fixed set, they have different use cases:
+
+#### Comparison
+- **`enum`**: Represents a fixed set of constant *values*. Every value is identical in structure and does not contain unique state instances (e.g., `enum Status { loading, success, error }`).
+- **`sealed` class**: Represents a fixed set of *types* (subclasses). Each subclass can be instantiated with its own unique properties, parameters, and behaviors (e.g., `class Success extends Status { final String data; ... }`).
+
+#### Common Use Case
+Sealed classes are widely used in state management to represent distinct UI states where different states hold different types of payload data (e.g., an `Error` state holding a message string, and `Loaded` holding a query result).
+
+[Back to Index](../dart_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#medium-14-what-is-the-difference-between-a-sealed-class-and-an-enum-in-dart)
+
+---
+
+### Medium 15. What is a StreamController and how does a single-subscription stream differ from a broadcast stream?
+
+A `StreamController` is used to create and manage streams in Dart. It provides a `sink` to add data/events and a `stream` to listen to them.
+
+#### Stream Types
+1. **Single-Subscription Stream**:
+   - Allows only one listener during its entire lifetime.
+   - If you try to listen to it a second time, it throws an exception.
+   - It is designed for sequential data (e.g., file downloads).
+2. **Broadcast Stream**:
+   - Allows multiple listeners to subscribe simultaneously.
+   - Events are sent to all active listeners.
+   - Listeners only receive events sent after they subscribe.
+   - It is designed for independent, real-time events (e.g., UI clicks, sensor events).
+
+```dart
+// Creating a broadcast stream controller
+final controller = StreamController<int>.broadcast();
+```
+
+[Back to Index](../dart_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#medium-15-what-is-a-streamcontroller-and-how-does-a-single-subscription-stream-differ-from-a-broadcast-stream)
 
 ## Hard Questions
 
@@ -489,3 +590,49 @@ switch (pair) {
 [Back to Index](../dart_interview_questions.md) &nbsp;&nbsp;/&nbsp;&nbsp; [Quick Revision](../sort_questions/dart_interview_questions_sort.md#hard-11-explain-pattern-matching-and-destructuring-in-dart-3)
 
 ---
+
+---
+
+### Hard 12. Explain variance and the covariant keyword in Dart's type system.
+
+Variance describes how type relationships of generic parameters affect the subtype relationships of the classes containing them.
+
+#### Covariance in generics
+In Dart, generic parameters on classes are **covariant** by default. This means if `Dog` is a subclass of `Animal`, then `List<Dog>` is treated as a subclass of `List<Animal>`. While safe for reading data, covariance can cause runtime type exceptions when writing data.
+
+#### The `covariant` Keyword
+The `covariant` keyword tells the compiler to allow a method parameter in a subclass to be a more specific subtype than what is declared in the parent class.
+
+```dart
+abstract class AnimalFeed {}
+class DogFood extends AnimalFeed {}
+
+class Animal {
+  void eat(AnimalFeed feed) {}
+}
+
+class Dog extends Animal {
+  @override
+  // Without 'covariant', this override would cause a static analysis error
+  void eat(covariant DogFood feed) {}
+}
+```
+
+[Back to Index](../dart_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#hard-12-explain-variance-and-the-covariant-keyword-in-darts-type-system)
+
+---
+
+### Hard 13. What are Dart Macros (Metaprogramming) and how do they change static code generation in Dart?
+
+Dart Macros represent a compile-time metaprogramming feature designed to replace static code generation tools like `build_runner` (used for `freezed`, `json_serializable`, etc.).
+
+#### How it works
+Macros compile and execute *during the static analysis/compilation phase* of Dart. They inspect the existing code structure (such as class fields or methods) and generate additional Dart code directly into the compiler's memory tree.
+
+#### Key Benefits
+- **No File Clutter**: No need to generate `.g.dart` or `.freezed.dart` files.
+- **Instant Updates**: Code is generated in real-time as you type, rather than waiting for long `dart run build_runner build` runs.
+- **IDE Integration**: The IDE can see and navigate to the macro-generated members immediately.
+
+[Back to Index](../dart_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#hard-13-what-are-dart-macros-metaprogramming-and-how-do-they-change-static-code-generation-in-dart)
+

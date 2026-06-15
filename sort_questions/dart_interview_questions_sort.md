@@ -108,6 +108,21 @@ Condensed 1-4 sentence answers for last-minute review.
 
 ---
 
+---
+
+### Easy 11. What is the cascade operator (..) in Dart and how does it help write cleaner code?
+
+*The cascade operator (`..`) allows you to perform multiple operations, such as modifying properties or calling methods, on the same object sequentially without repeating the object name. `?..` is the null-aware version.*
+
+[Back to Index](../dart_interview_questions.md#easy-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#easy-11-what-is-the-cascade-operator-in-dart-and-how-does-it-help-write-cleaner-code)
+
+---
+
+### Easy 12. Explain the spread operator (...) and null-aware spread operator (...?) in Dart collections.
+
+*The spread operator (`...`) inserts all elements of one collection into another. The null-aware spread operator (`...?`) does the same but safely ignores the collection if it is null, avoiding runtime exceptions.*
+
+[Back to Index](../dart_interview_questions.md#easy-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#easy-12-explain-the-spread-operator-and-null-aware-spread-operator-in-dart-collections)
 
 ## Medium Questions
 
@@ -231,6 +246,29 @@ Condensed 1-4 sentence answers for last-minute review.
 
 ---
 
+---
+
+### Medium 13. What are class modifiers in Dart 3 (such as base, interface, final, sealed) and how do they control inheritance?
+
+*Class modifiers restrict how external classes use your class. `base` blocks implementation; `interface` blocks extension; `final` blocks both; and `sealed` blocks both plus instantiation, requiring all subclasses to be in the same file.*
+
+[Back to Index](../dart_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#medium-13-what-are-class-modifiers-in-dart-3-and-how-do-they-control-inheritance)
+
+---
+
+### Medium 14. What is the difference between a sealed class and an enum in Dart?
+
+*An `enum` defines a fixed set of constant values with identical fields. A `sealed` class defines a fixed set of subclasses, where each subclass can have distinct fields, custom methods, and unique runtime data instances.*
+
+[Back to Index](../dart_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#medium-14-what-is-the-difference-between-a-sealed-class-and-an-enum-in-dart)
+
+---
+
+### Medium 15. What is a StreamController and how does a single-subscription stream differ from a broadcast stream?
+
+*A `StreamController` manages a stream's lifecycle. A single-subscription stream allows only one listener and buffer events, while a broadcast stream allows multiple concurrent listeners and discards events if no one is listening.*
+
+[Back to Index](../dart_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#medium-15-what-is-a-streamcontroller-and-how-does-a-single-subscription-stream-differ-from-a-broadcast-stream)
 
 ## Hard Questions
 
@@ -343,3 +381,20 @@ Condensed 1-4 sentence answers for last-minute review.
 [Back to Index](../dart_interview_questions.md) &nbsp;&nbsp;/&nbsp;&nbsp; [Detailed Guide](../detailed_questions/dart_interview_questions.md#hard-11-explain-pattern-matching-and-destructuring-in-dart-3)
 
 ---
+
+---
+
+### Hard 12. Explain variance and the covariant keyword in Dart's type system?
+
+*Generics in Dart are covariant, meaning `List<Dog>` is a subtype of `List<Animal>`. The `covariant` keyword allows an overridden method parameter in a subclass to accept a more specific type than its parent method parameter.*
+
+[Back to Index](../dart_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#hard-12-explain-variance-and-the-covariant-keyword-in-darts-type-system)
+
+---
+
+### Hard 13. What are Dart Macros (Metaprogramming) and how do they change static code generation in Dart?
+
+*Dart Macros enable compile-time metaprogramming. They run during code analysis and compile phase to generate code dynamically in memory, eliminating generated files (`.g.dart`) and avoiding slow `build_runner` build scripts.*
+
+[Back to Index](../dart_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#hard-13-what-are-dart-macros-metaprogramming-and-how-do-they-change-static-code-generation-in-dart)
+
