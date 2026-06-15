@@ -11,8 +11,8 @@ All answers have been simplified and rewritten in clear, natural, native English
 The questions are organized by subject and difficulty across three directories:
 
 ```
-InterviewQuestions/
-├── README.md                           <-- You are here
+.
+├── README.md                           <-- You are here (Repository Root)
 ├── flutter_interview_questions.md      <-- Flutter index (tables of contents)
 ├── dart_interview_questions.md         <-- Dart index (tables of contents)
 ├── detailed_questions/
