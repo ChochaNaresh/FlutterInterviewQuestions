@@ -270,6 +270,22 @@ Condensed 1-4 sentence answers for last-minute review.
 
 [Back to Index](../dart_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#medium-15-what-is-a-streamcontroller-and-how-does-a-single-subscription-stream-differ-from-a-broadcast-stream)
 
+---
+
+### Medium 16. What is the difference between Stream.map(), Stream.transform(), and custom StreamTransformer classes?
+
+*`Stream.map` maps events one-to-one. `Stream.transform` uses a `StreamTransformer` object to apply advanced state transformations, allowing you to filter events, handle errors, or map one event to multiple outputs.*
+
+[Back to Index](../dart_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#medium-16-what-is-the-difference-between-streammap-streamtransform-and-custom-streamtransformer-classes)
+
+---
+
+### Medium 17. How does Dart handle Equatable or Value-based equality manually without using packages?
+
+*Override both the `==` operator (for property comparisons) and the `hashCode` getter. Failing to override both breaks collection lookups in sets and maps, which rely on hash-based indexes.*
+
+[Back to Index](../dart_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#medium-17-how-does-dart-handle-equatable-or-value-based-equality-manually-without-using-packages)
+
 ## Hard Questions
 
 ### Hard 1. How does the Dart Event Loop work? (Microtask vs Event Queue)
@@ -397,4 +413,28 @@ Condensed 1-4 sentence answers for last-minute review.
 *Dart Macros enable compile-time metaprogramming. They run during code analysis and compile phase to generate code dynamically in memory, eliminating generated files (`.g.dart`) and avoiding slow `build_runner` build scripts.*
 
 [Back to Index](../dart_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#hard-13-what-are-dart-macros-metaprogramming-and-how-do-they-change-static-code-generation-in-dart)
+
+---
+
+### Hard 14. Explain Dart's asynchronous event loop scheduling in detail: if a microtask is scheduled inside an event, when does it execute, and how does it block subsequent events?
+
+*A microtask scheduled inside an event executes immediately after the current event finishes, blocking subsequent events. Overloading microtasks starves the Event queue, locking UI updates and user gestures.*
+
+[Back to Index](../dart_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#hard-14-explain-darts-asynchronous-event-loop-scheduling-in-detail-if-a-microtask-is-scheduled-inside-an-event-when-does-it-execute-and-how-does-it-block-subsequent-events)
+
+---
+
+### Hard 15. How do you perform heavy data processing using Background Isolates (Isolate.run or compute) without locking the UI, and how does memory sharing work between isolates?
+
+*Use `Isolate.run` to execute tasks on background heaps. Because isolates run on separate memory segments, data is copied during messaging. For large datasets, use `TransferableTypedData` for zero-copy transfers.*
+
+[Back to Index](../dart_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#hard-15-how-do-you-perform-heavy-data-processing-using-background-isolates-without-locking-the-ui-and-how-does-memory-sharing-work-between-isolates)
+
+---
+
+### Hard 16. Explain how Dart's Sound Type System handles Covariance, Contravariance, and the dynamic type at compilation vs runtime.
+
+*Dart generics are covariant, enforcing runtime type safety checks. The `dynamic` type turns off static analysis entirely (risking runtime crashes), while `Object?` maintains static type-checking safety.*
+
+[Back to Index](../dart_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/dart_interview_questions.md#hard-16-explain-how-darts-sound-type-system-handles-covariance-contravariance-and-the-dynamic-type-at-compilation-vs-runtime)
 

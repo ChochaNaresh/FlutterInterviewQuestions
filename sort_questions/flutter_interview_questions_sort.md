@@ -860,6 +860,22 @@ Condensed 1-4 sentence answers for last-minute review.
 
 [Back to Index](../flutter_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#medium-44-what-is-state-restoration-in-flutter-and-how-is-it-implemented)
 
+---
+
+### Medium 45. What is the difference between WidgetsBindingObserver and standard lifecycle methods in a stateful widget?
+
+*Stateful lifecycle methods handle standard widget tree changes. `WidgetsBindingObserver` monitors global system actions like theme updates, soft keyboard toggle events, and changes to the app's background/foreground states.*
+
+[Back to Index](../flutter_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#medium-45-what-is-the-difference-between-widgetsbindingobserver-and-standard-lifecycle-methods-in-a-stateful-widget)
+
+---
+
+### Medium 46. Explain the difference between SizedBox.shrink(), SizedBox.expand(), and LayoutBuilder constraints.
+
+*`SizedBox.shrink` applies minimum constraints (0x0), making widgets invisible. `SizedBox.expand` forces a child to fill all available parent space. `LayoutBuilder` reads parent constraints at runtime to build responsive layouts.*
+
+[Back to Index](../flutter_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#medium-46-explain-the-difference-between-sizedboxshrink-sizedboxexpand-and-layoutbuilder-constraints)
+
 ## Hard Questions
 
 ### Hard 1. What are slivers
@@ -1075,4 +1091,28 @@ Condensed 1-4 sentence answers for last-minute review.
 *Dart FFI allows Dart code to call native C, C++, or Rust functions directly and synchronously. It bypasses Platform Channels entirely, eliminating message serialization overhead, making it ideal for high-performance libraries or system integrations.*
 
 [Back to Index](../flutter_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#hard-22-what-is-dart-ffi-foreign-function-interface-and-when-should-it-be-used-in-flutter)
+
+---
+
+### Hard 23. Explain the role of SchedulerBinding and how you can schedule tasks across different frame phases.
+
+*`SchedulerBinding` coordinates rendering phases. Use `addPostFrameCallback` to execute code safely after a frame finishes drawing. Use `scheduleTask` to run low-priority background logic only when the rendering engine is idle.*
+
+[Back to Index](../flutter_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#hard-23-explain-the-role-of-schedulerbinding-and-how-you-can-schedule-tasks-across-different-frame-phases)
+
+---
+
+### Hard 24. How does Flutter's Threading Model work under the hood? Explain the roles of the Platform thread, UI thread, Raster (GPU) thread, and IO thread.
+
+*Flutter utilizes four threads: the Platform thread (OS interface), the UI thread (runs Dart VM & Layout), the Raster thread (GPU commands), and the IO thread (disk/image loading), avoiding rendering lockups.*
+
+[Back to Index](../flutter_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#hard-24-how-does-flutters-threading-model-work-under-the-hood-explain-the-roles-of-the-platform-thread-ui-thread-raster-gpu-thread-and-io-thread)
+
+---
+
+### Hard 25. How do you identify, analyze, and resolve memory leaks (such as image caches, stream listeners, or controller closures) using Flutter DevTools?
+
+*Use the DevTools Memory tab to capture heap snapshots before and after navigating. Look for unreleased class counts, and resolve leaks by canceling subscriptions, disposing controllers, and clearing global callbacks.*
+
+[Back to Index](../flutter_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/flutter_interview_questions.md#hard-25-how-do-you-identify-analyze-and-resolve-memory-leaks-using-flutter-devtools)
 

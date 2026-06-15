@@ -442,6 +442,69 @@ final controller = StreamController<int>.broadcast();
 
 [Back to Index](../dart_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#medium-15-what-is-a-streamcontroller-and-how-does-a-single-subscription-stream-differ-from-a-broadcast-stream)
 
+---
+
+### Medium 16. What is the difference between Stream.map(), Stream.transform(), and custom StreamTransformer classes?
+
+These methods are used to inspect and manipulate streams of data in Dart:
+
+#### 1. `Stream.map()`
+- **Behavior:** Transforms every single event on a stream directly using a mapper function.
+- **Limitation:** It is strictly a one-to-one mapping (one input event always produces exactly one output event).
+
+#### 2. `Stream.transform()`
+- **Behavior:** Exposes the stream data pipeline to a `StreamTransformer` object, allowing you to intercept, modify, filter, or duplicate stream data packages dynamically.
+
+#### 3. `StreamTransformer`
+- **Behavior:** The class passed to `transform()`. It handles complex transformation states (like buffering data packages or mapping one input event to multiple output events, or intercepting error states).
+
+```dart
+// Example of transforming a stream using custom logic
+final parsedStream = rawStream.transform(
+  StreamTransformer<String, int>.fromHandlers(
+    handleData: (data, sink) {
+      final val = int.tryParse(data);
+      if (val != null) sink.add(val); // Discard non-integer inputs (many-to-few mapping)
+    },
+  ),
+);
+```
+
+[Back to Index](../dart_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#medium-16-what-is-the-difference-between-streammap-streamtransform-and-custom-streamtransformer-classes)
+
+---
+
+### Medium 17. How does Dart handle Equatable or Value-based equality manually without using packages?
+
+By default, Dart evaluates class equality using reference-based equality (two objects are only equal if they point to the exact same location in memory).
+
+#### The Solution: Overriding Equality and Hashcode
+To evaluate objects based on their properties, you must override both the `==` operator and the `hashCode` getter:
+
+```dart
+class User {
+  final String id;
+  final String name;
+
+  User(this.id, this.name);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true; // Ref equality check first
+    return other is User && other.id == id && other.name == name;
+  }
+
+  @override
+  // Always override hashCode when overriding == operator
+  int get hashCode => id.hashCode ^ name.hashCode;
+}
+```
+
+#### Why you must override both
+If you only override `==` but not `hashCode`, maps and sets (which index items using hash codes) will treat identical data instances as different keys, causing silent data collection bugs.
+
+[Back to Index](../dart_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#medium-17-how-does-dart-handle-equatable-or-value-based-equality-manually-without-using-packages)
+
 ## Hard Questions
 
 ### Hard 1. How does the Dart Event Loop work? (Microtask vs Event Queue)
@@ -635,4 +698,58 @@ Macros compile and execute *during the static analysis/compilation phase* of Dar
 - **IDE Integration**: The IDE can see and navigate to the macro-generated members immediately.
 
 [Back to Index](../dart_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#hard-13-what-are-dart-macros-metaprogramming-and-how-do-they-change-static-code-generation-in-dart)
+
+---
+
+### Hard 14. Explain Dart's asynchronous event loop scheduling in detail: if a microtask is scheduled inside an event, when does it execute, and how does it block subsequent events?
+
+Dart's event loop executes tasks using two queues: the **Event Queue** (I/O, timers, user interactions) and the **Microtask Queue** (internal async logic).
+
+#### Precedence & Execution Rules
+1. The event loop prioritizes the Microtask queue completely over the Event queue. No Event queue task can run if there are pending microtasks.
+2. If a microtask is scheduled *inside* an Event callback, it is placed in the Microtask queue.
+3. As soon as the current Event finishes executing, Dart pauses the Event queue, processes all microtasks, and only then resumes the Event queue.
+
+#### Blocking implications
+Because the event loop must empty the Microtask queue before picking the next event, scheduling recursive or heavy calculations inside microtasks will starve the Event queue. This freezes user gestures, stops animations, and locks the application interface.
+
+[Back to Index](../dart_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#hard-14-explain-darts-asynchronous-event-loop-scheduling-in-detail-if-a-microtask-is-scheduled-inside-an-event-when-does-it-execute-and-how-does-it-block-subsequent-events)
+
+---
+
+### Hard 15. How do you perform heavy data processing using Background Isolates (Isolate.run or compute) without locking the UI, and how does memory sharing work between isolates?
+
+Because Dart runs on a single UI thread, executing heavy computations (like parsing large JSON objects or processing images) will cause frame drops. 
+
+#### Background Isolates
+Use `Isolate.run()` to offload heavy synchronous tasks to a background isolate easily:
+
+```dart
+final parsedData = await Isolate.run(() => parseLargePayload(rawString));
+```
+
+#### Memory Sharing & Message Passing
+- **Separate Memory Trees:** Isolates do not share memory. Each isolate has its own isolated heap memory heap.
+- **Serialization Overhead:** When sending messages between isolates, the data is copied by default, which can introduce overhead for huge datasets.
+- **Zero-Copy Optimization:** For huge byte payloads, you can pass instances of `TransferableTypedData` to perform zero-copy message transfers, moving memory buffers between isolates instantly without serialization overhead.
+
+[Back to Index](../dart_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#hard-15-how-do-you-perform-heavy-data-processing-using-background-isolates-without-locking-the-ui-and-how-does-memory-sharing-work-between-isolates)
+
+---
+
+### Hard 16. Explain how Dart's Sound Type System handles Covariance, Contravariance, and the dynamic type at compilation vs runtime.
+
+Dart features a **sound type system**, meaning the compiler guarantees that variables can never hold values that do not match their declared types.
+
+#### 1. Covariance
+Generics are covariant (meaning `List<Dog>` is treated as a subtype of `List<Animal>`). At compile-time, the analyzer allows adding any `Animal` to `List<Animal>`, but if the backing list is actually `List<Dog>`, the runtime environment throws a type cast crash to preserve type safety.
+
+#### 2. Contravariance
+Dart does not support contravariance (where a class with a wider type argument is a subclass of one with a narrower argument). 
+
+#### 3. dynamic vs Object?
+- **`dynamic`**: Disables compile-time type checking entirely. The compiler allows calling any method on the variable, but throws a runtime exception if the method does not exist.
+- **`Object?`**: Tells the compiler that the value is unknown but respects static type checking. You cannot call custom methods on it without casting it first, preventing runtime errors.
+
+[Back to Index](../dart_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/dart_interview_questions_sort.md#hard-16-explain-how-darts-sound-type-system-handles-covariance-contravariance-and-the-dynamic-type-at-compilation-vs-runtime)
 

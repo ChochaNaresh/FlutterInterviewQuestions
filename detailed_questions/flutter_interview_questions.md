@@ -1620,6 +1620,76 @@ class _MyState extends State<MyWidget> with RestorationMixin {
 
 [Back to Index](../flutter_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#medium-44-what-is-state-restoration-in-flutter-and-how-is-it-implemented)
 
+---
+
+### Medium 45. What is the difference between WidgetsBindingObserver and standard lifecycle methods in a stateful widget?
+
+Stateful widget lifecycle methods (like `initState`, `didUpdateWidget`, and `dispose`) respond directly to the widget's insertion, change, and removal inside the widget tree.
+
+#### WidgetsBindingObserver
+`WidgetsBindingObserver` is an abstract interface that allows your widget to listen to global application-level events dispatched by the Flutter engine.
+
+#### Key Features of WidgetsBindingObserver
+- **App Lifecycle Changes**: Override `didChangeAppLifecycleState` to know when the app goes to the background, resumes, or pauses (e.g., stopping active timers when minimized).
+- **System Theme Changes**: Listen to user device changes between dark and light modes using `didChangePlatformBrightness`.
+- **Keyboard Visibility**: Listen to soft keyboard open/close states using `didChangeMetrics`.
+
+```dart
+class _MyWidgetState extends State<MyWidget> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this); // Register
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // Cleanup
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      // Free memory or pause processes
+    }
+  }
+}
+```
+
+[Back to Index](../flutter_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#medium-45-what-is-the-difference-between-widgetsbindingobserver-and-standard-lifecycle-methods-in-a-stateful-widget)
+
+---
+
+### Medium 46. Explain the difference between SizedBox.shrink(), SizedBox.expand(), and LayoutBuilder constraints.
+
+Flutter layouts follow a strict rule: **"Constraints go down, sizes go up, parent sets position."** These three layout helpers interact with this rule differently:
+
+#### 1. `SizedBox.shrink()`
+- **Behavior:** Passes the minimum possible constraints down (width: 0, height: 0).
+- **Use Case:** Hiding an element completely or reserving zero space inside a layout when conditional flags are inactive.
+
+#### 2. `SizedBox.expand()`
+- **Behavior:** Passes maximum possible constraints down, matching the size of its parent.
+- **Use Case:** Forcing a child widget to take up all remaining space inside its parent container.
+
+#### 3. `LayoutBuilder`
+- **Behavior:** Exposes the exact constraints (`BoxConstraints`) sent down by the parent container at runtime.
+- **Use Case:** Building responsive layouts. You inspect `constraints.maxWidth` to decide whether to render a mobile column or a desktop row widget.
+
+```dart
+LayoutBuilder(
+  builder: (context, constraints) {
+    if (constraints.maxWidth > 600) {
+      return Row(children: [...]); // Desktop layout
+    }
+    return Column(children: [...]); // Mobile layout
+  },
+)
+```
+
+[Back to Index](../flutter_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#medium-46-explain-the-difference-between-sizedboxshrink-sizedboxexpand-and-layoutbuilder-constraints)
+
 ## Hard Questions
 
 ### Hard 1. What are slivers
@@ -2041,4 +2111,66 @@ final result = nativeAdd(10, 20);
 ```
 
 [Back to Index](../flutter_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#hard-22-what-is-dart-ffi-foreign-function-interface-and-when-should-it-be-used-in-flutter)
+
+---
+
+### Hard 23. Explain the role of SchedulerBinding and how you can schedule tasks across different frame phases.
+
+`SchedulerBinding` is the Flutter engine service responsible for managing frame draw schedules, rendering lifecycles, and scheduling microtasks.
+
+#### Frame Execution Phases
+A single frame update executes through several distinct phases:
+1. **Transient Callbacks**: Handles animations (notifying ticker/animations controllers to update states).
+2. **Microtasks**: Executes pending microtasks queued during animation updates.
+3. **Layout & Paint**: Re-evaluates widget dimensions and draws elements onto graphics surfaces.
+
+#### Scheduling Hooks
+- **`addPostFrameCallback`**: Schedules a callback to execute *exactly once* after the current frame finishes rendering. This is the only safe way to access widget sizes or show dialogs during `initState()`.
+- **`scheduleTask`**: Schedules low-priority tasks (like decoding cached data or parsing logs) to execute only when the engine is idle, preventing frame drops.
+
+```dart
+// Safely trigger navigation after frame finishes rendering
+WidgetsBinding.instance.addPostFrameCallback((_) {
+  Navigator.pushNamed(context, '/home');
+});
+```
+
+[Back to Index](../flutter_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#hard-23-explain-the-role-of-schedulerbinding-and-how-you-can-schedule-tasks-across-different-frame-phases)
+
+---
+
+### Hard 24. How does Flutter's Threading Model work under the hood? Explain the roles of the Platform thread, UI thread, Raster (GPU) thread, and IO thread.
+
+While Dart is single-threaded, the Flutter Engine runs across **four distinct threads** (task runners) to ensure high rendering performance.
+
+#### The Four Threads
+1. **Platform (Main) Thread**:
+   - **Role:** Interacts with the host OS. It handles native platform lifecycles, runs plugins, and routes system inputs (taps, keys, screen rotations) to Flutter.
+2. **UI Thread**:
+   - **Role:** Executes the Dart Virtual Machine (VM). It handles the layout pass, executes build widgets, runs animations, and compiles the layout into a "Layer Tree" command buffer.
+3. **Raster (GPU) Thread**:
+   - **Role:** Communicates with the graphics pipeline. It reads the Layer Tree generated by the UI thread, executes GPU instructions, and sends them to the display backend using Impeller or Skia.
+4. **IO Thread**:
+   - **Role:** Handles expensive input/output operations (e.g., loading compressed images or reading assets from disk) without blocking the UI or Raster threads.
+
+[Back to Index](../flutter_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#hard-24-how-does-flutters-threading-model-work-under-the-hood-explain-the-roles-of-the-platform-thread-ui-thread-raster-gpu-thread-and-io-thread)
+
+---
+
+### Hard 25. How do you identify, analyze, and resolve memory leaks (such as image caches, stream listeners, or controller closures) using Flutter DevTools?
+
+Memory leaks occur when the garbage collector cannot dispose of unused objects because they are still referenced by long-lived variables.
+
+#### Identification using DevTools
+1. **Launch the Memory Analyzer**: Open Flutter DevTools and navigate to the **Memory** tab.
+2. **Capture Heap Snapshots**: Take a snapshot, perform navigation flows (open and close a target screen multiple times), and capture a second snapshot.
+3. **Analyze Instance Growth**: Filter by your class name (e.g., `_MyCustomScreenState`). If the instance count increases continuously after the screen is closed, you have a memory leak.
+4. **Inspect Retaining Paths**: Examine the object graph. Look for lingering references to see which active object (like a global listener) is keeping it alive.
+
+#### Common Culprits & Resolutions
+- **Unclosed Stream Subscriptions**: Always call `subscription.cancel()` in `dispose()`.
+- **Lingering Controllers**: Call `.dispose()` on `AnimationController` and `TextEditingController`.
+- **Static closures / Global Callbacks**: Avoid registering static class methods to global event busses without unregistering them.
+
+[Back to Index](../flutter_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/flutter_interview_questions_sort.md#hard-25-how-do-you-identify-analyze-and-resolve-memory-leaks-using-flutter-devtools)
 
