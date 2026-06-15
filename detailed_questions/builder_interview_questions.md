@@ -55,6 +55,48 @@ class User {
 
 [Back to Index](../builder_interview_questions.md#easy-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#easy-3-what-is-the-purpose-of-the-json_serializable-package)
 
+### Easy 4. What is the difference between `part` and `import` directives in Dart?
+
+Both directives are used to organize code and manage dependencies, but they operate at different levels of library structure:
+
+#### `import`
+- **Scope:** Loads an external library or file into a completely separate namespace.
+- **Privacy:** Imported files cannot access private members (prefixed with `_`) of each other.
+- **Use Case:** Reusing components, models, or packages across different parts of the application.
+
+#### `part` and `part of`
+- **Scope:** Splits a single library across multiple physical files. They behave as if they are a single file compiled together.
+- **Privacy:** Allows both files to access each other's private members (e.g. `_$User`, `_$UserFromJson`, `_User`). This is the exact mechanism code generators use to hook generated files into your user-defined classes.
+- **Use Case:** Linking code generator target files (like `user.freezed.dart` or `user.g.dart`) to the main file `user.dart`.
+
+```dart
+// user.dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'user.freezed.dart'; // Links the generated part file
+```
+
+[Back to Index](../builder_interview_questions.md#easy-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#easy-4-what-is-the-difference-between-part-and-import-directives-in-dart)
+
+### Easy 5. What are annotations in Dart and how are they used in code generation?
+
+Annotations are compile-time metadata tagged to Dart source elements (classes, methods, variables, constructors).
+
+#### Mechanism
+- **Declaration:** Annotations start with the `@` symbol, representing either a constant value or a constant constructor of a class (e.g. `@freezed`, `@JsonKey(...)`, `@JsonSerializable()`).
+- **Processing:** During the build process, the `build_runner` scans your project for files containing these specific annotations.
+- **Generation:** Custom generators (from packages like `freezed` or `json_serializable`) read the metadata details and class properties, then output a new Dart file (typically with a `.g.dart` or `.freezed.dart` extension) containing the boilerplate code.
+
+```dart
+@JsonSerializable() // This annotation flags the class for json_serializable processing
+class Config {
+  final String host;
+  Config(this.host);
+}
+```
+
+[Back to Index](../builder_interview_questions.md#easy-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#easy-5-what-are-annotations-in-dart-and-how-are-they-used-in-code-generation)
+
 ## Medium Questions
 
 ### Medium 1. How do you run the code generator and what is the difference between build and watch commands?
@@ -200,6 +242,53 @@ class PaginatedResponse<T> {
 ```
 
 [Back to Index](../builder_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#medium-6-how-do-you-serialize-deserialize-generic-models-using-json_serializable)
+
+### Medium 7. Should generated files (e.g., .g.dart and .freezed.dart) be committed to Git?
+
+Whether to commit generated code files to version control is a classic debate in the Flutter community, with valid arguments on both sides:
+
+#### Option A: Exclude them (Standard Industry Practice)
+- **Action:** Add `*.g.dart` and `*.freezed.dart` to your `.gitignore`.
+- **Pros:** Keeps Pull Requests (PRs) clean and readable since generated code files don't show up in code reviews. Prevents Git merge conflicts in generated files.
+- **Cons:** Developers and CI/CD pipelines must run the build runner (`dart run build_runner build`) before compiling or testing the application, which can slow down build starts.
+
+#### Option B: Include them (Commit to Git)
+- **Action:** Commit all generated files to your repository.
+- **Pros:** Simplifies onboarding—new developers or CI pipelines can clone the repository and run the app immediately without running `build_runner`. Guarantees reproducible builds if builder dependency versions drift.
+- **Cons:** Bloats git history and PR diffs. Can lead to frequent git merge conflicts if multiple developers modify models concurrently.
+
+[Back to Index](../builder_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#medium-7-should-generated-files-eg-gdart-and-freezeddart-be-committed-to-git)
+
+### Medium 8. What is the purpose of @JsonValue and how does it differ from @JsonKey?
+
+Both annotations are provided by the `json_serializable` package to customize JSON keys, but they apply to different Dart types:
+
+#### `@JsonKey`
+- **Target:** Class properties/fields.
+- **Use Case:** Customizes how a class field is serialized or deserialized. It includes properties for key renames (`name`), default values (`defaultValue`), ignoring fields (`includeToJson`/`includeFromJson`), and custom converters (`fromJson`/`toJson`).
+
+```dart
+class User {
+  @JsonKey(name: 'first_name', defaultValue: 'Guest')
+  final String firstName;
+  User(this.firstName);
+}
+```
+
+#### `@JsonValue`
+- **Target:** Enum fields.
+- **Use Case:** Customizes the serialized value of an individual enum value when serializing the enum itself.
+
+```dart
+enum UserRole {
+  @JsonValue('admin_user')
+  admin,
+  @JsonValue('standard_member')
+  member,
+}
+```
+
+[Back to Index](../builder_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#medium-8-what-is-the-purpose-of-jsonvalue-and-how-does-it-differ-from-jsonkey)
 
 ## Hard Questions
 
@@ -367,4 +456,74 @@ class Dog extends Animal {
 ```
 
 [Back to Index](../builder_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#hard-6-how-do-you-handle-class-inheritance-or-polymorphic-classes-when-serializing-deserializing-json-using-json_serializable)
+
+### Hard 7. How do you create a custom code generator in Dart using the `source_gen` and `build` packages?
+
+Creating a custom generator allows you to write custom annotations and automate boilerplate specific to your own company's architecture.
+
+#### Step-by-Step Implementation Flow
+
+1. **Create the Annotation package:** Declare a simple constant class that developers will use to annotate their source code.
+   ```dart
+   class CustomAutoRoute {
+     final String path;
+     const CustomAutoRoute(this.path);
+   }
+   ```
+2. **Implement the Generator:** Create a class extending `GeneratorForAnnotation<AnnotationType>` from the `source_gen` package. Override `generateForAnnotatedElement` to analyze the syntax tree and return generated code as a string.
+   ```dart
+   import 'package:analyzer/dart/element/element.dart';
+   import 'package:build/build.dart';
+   import 'package:source_gen/source_gen.dart';
+
+   class CustomRouteGenerator extends GeneratorForAnnotation<CustomAutoRoute> {
+     @override
+     String generateForAnnotatedElement(
+       Element element,
+       ConstantReader annotation,
+       BuildStep buildStep,
+     ) {
+       final path = annotation.read('path').stringValue;
+       return '// Generated route path: $path\nclass ${element.name}Route {}';
+     }
+   }
+   ```
+3. **Register the Builder:** Declare a builder helper function that returns a `Builder` class wrapping your generator.
+   ```dart
+   Builder customRouteBuilder(BuilderOptions options) =>
+       SharedPartBuilder([CustomRouteGenerator()], 'custom_route');
+   ```
+4. **Configure `build.yaml`:** Register your builder in `build.yaml` so the `build_runner` package knows when and how to invoke it.
+   ```yaml
+   builders:
+     custom_route_builder:
+       import: "package:my_builder_package/my_builder_package.dart"
+       builder_factories: ["customRouteBuilder"]
+       build_extensions: {".dart": [".custom_route.g.dart"]}
+       auto_apply: dependents
+       build_to: cache
+   ```
+
+[Back to Index](../builder_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#hard-7-how-do-you-create-a-custom-code-generator-in-dart-using-the-source_gen-and-build-packages)
+
+---
+
+### Hard 8. How does `build_runner` handle incremental compilation, and what is the role of `build.yaml`'s `build_to: cache` vs `build_to: source`?
+
+`build_runner` avoids recompiling unchanged files by using an incremental build system. It tracks file hashes and dependency graphs to only compile what is necessary.
+
+#### `build_to: cache` (Hidden Cache Mode)
+- **Destination:** Code is written to the hidden directory `.dart_tool/build/generated/package_name/lib/`.
+- **Visibility:** Not directly visible under your project's `lib/` directory, keeping your folder structure clean.
+- **Behavior:** Standard Dart tools and IDEs read these files automatically. They are typically used for builders that output assets or intermediate targets (like route manifests) that developers do not need to read or edit.
+- **Git:** Automatically ignored since they reside inside `.dart_tool/`.
+
+#### `build_to: source` (Source Directory Mode)
+- **Destination:** Code is written directly into the source tree next to the annotated file (e.g. `user.g.dart` inside `lib/`).
+- **Visibility:** Fully visible to the developer in the project explorer.
+- **Behavior:** This is required for part files (`part 'user.g.dart'`) because Dart's compiler expects parts to reside in the exact same physical folder as their parent file.
+- **Git:** Can be either committed or ignored depending on project `.gitignore` settings.
+
+[Back to Index](../builder_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#hard-8-how-does-build_runner-handle-incremental-compilation-and-what-is-the-role-of-buildyamls-build_to-cache-vs-build_to-source)
+
 

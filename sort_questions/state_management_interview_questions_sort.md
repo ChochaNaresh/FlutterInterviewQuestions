@@ -34,6 +34,18 @@ This guide contains quick-revision answers for 20 State Management interview que
 
 [Back to Index](../state_management_interview_questions.md#easy-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#easy-5-what-is-the-providerscope-widget-in-riverpod-and-why-is-it-required)
 
+### Easy 6. What is the difference between ephemeral (local) state and app (shared) state?
+
+*Ephemeral state is UI-specific data that is confined to a single widget (like the active tab index or a hover state) and managed using `setState()`. App state is shared globally across screens (like user authentication or a shopping cart) and managed using libraries.*
+
+[Back to Index](../state_management_interview_questions.md#easy-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#easy-6-what-is-the-difference-between-ephemeral-local-state-and-app-shared-state)
+
+### Easy 7. What is the purpose of `InheritedWidget` in Flutter?
+
+*`InheritedWidget` is Flutter's native class for passing data down the widget tree without constructor parameters. It registers descendant widgets as dependencies and automatically rebuilds them when the inherited data changes.*
+
+[Back to Index](../state_management_interview_questions.md#easy-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#easy-7-what-is-the-purpose-of-inheritedwidget-in-flutter)
+
 ## Medium Questions
 
 ### Medium 1. Differentiate between ChangeNotifier, ValueNotifier, and StateNotifier.
@@ -81,6 +93,20 @@ This guide contains quick-revision answers for 20 State Management interview que
 *`context.watch` rebuilds the widget on any state change. `context.select` targets rebuilds to specific state slices. `BlocListener` executes side-effect callbacks (such as alerts or navigation) without rebuilding the UI.*
 
 [Back to Index](../state_management_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#medium-7-what-is-the-difference-between-watch-and-listen-in-bloc-contextwatch-vs-contextselect-vs-bloclistener)
+
+### Medium 8. What is the difference between `ref.watch` and `ref.read` in Riverpod, and why should you never use `ref.read` inside a `build` method?
+
+*`ref.watch` subscribes to a provider and rebuilds the widget on state change. `ref.read` gets a one-time snapshot without subscribing. Using `ref.read` in `build` is an anti-pattern because the UI won't rebuild to show state updates.*
+
+[Back to Index](../state_management_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#medium-8-what-is-the-difference-between-refwatch-and-refread-in-riverpod-and-why-should-you-never-use-refread-inside-a-build-method)
+
+---
+
+### Medium 9. How does BLoC's `BlocSelector` differ from `BlocBuilder`, and when should you use it?
+
+*`BlocBuilder` rebuilds its child when any state property changes. `BlocSelector` filters updates, rebuilding only when a specific, selected sub-field (e.g. `state.userName`) changes, preventing redundant redraws.*
+
+[Back to Index](../state_management_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#medium-9-how-does-blocs-blocselector-differ-from-blocbuilder-and-when-should-you-use-it)
 
 ## Hard Questions
 
@@ -137,4 +163,18 @@ This guide contains quick-revision answers for 20 State Management interview que
 *`ref.keepAlive()` preserves an `autoDispose` provider's state in memory when it loses all listeners. This allows you to caching successful API payloads dynamically while discarding loading/failed request states.*
 
 [Back to Index](../state_management_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#hard-8-explain-how-riverpods-refkeepalive-or-keepalivelink-works-and-how-it-differs-from-the-default-caching-behavior-of-autodispose)
+
+### Hard 9. How do you unit test state classes in BLoC using the `bloc_test` package?
+
+*Use the `blocTest` utility function. Define the `build` parameter to initialize the Bloc, the `act` parameter to add events or invoke methods, and the `expect` parameter to specify the exact sequence of states expected to be emitted.*
+
+[Back to Index](../state_management_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#hard-9-how-do-you-unit-test-state-classes-in-bloc-using-the-bloc_test-package)
+
+---
+
+### Hard 10. How do you unit test providers in Riverpod without rendering UI widgets?
+
+*Instantiate a standalone `ProviderContainer` to hold the providers. Perform actions on the provider's notifier, call `container.read()` or watch values to check state progression, and call `container.dispose()` at the end of the test.*
+
+[Back to Index](../state_management_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#hard-10-how-do-you-unit-test-providers-in-riverpod-without-rendering-ui-widgets)
 

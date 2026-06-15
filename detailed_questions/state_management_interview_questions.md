@@ -90,6 +90,57 @@ void main() {
 
 [Back to Index](../state_management_interview_questions.md#easy-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#easy-5-what-is-the-providerscope-widget-in-riverpod-and-why-is-it-required)
 
+### Easy 6. What is the difference between ephemeral (local) state and app (shared) state?
+
+Flutter structures state into two high-level conceptual categories, depending on its lifetime and reuse scope:
+
+#### Ephemeral State (Local/UI State)
+- **Scope:** State that lives neatly inside a single widget. Other widgets in the tree do not need access to it.
+- **Management:** Typically managed using a standard `StatefulWidget` and `setState()`.
+- **Examples:**
+  - The current page index in a `PageView` or `BottomNavigationBar`.
+  - The hovered/focused status of a button.
+  - The current input value of a text field before form submission.
+  - Local animation controllers and ticker states.
+
+#### App State (Shared/Global State)
+- **Scope:** State that is shared across multiple screens or widgets, or needs to persist across different user sessions.
+- **Management:** Typically managed using state management frameworks (like Riverpod, BLoC, or Provider).
+- **Examples:**
+  - Login state / User profile authentication details.
+  - E-commerce shopping cart items.
+  - App settings (e.g. Dark/Light theme mode selection).
+  - Cached network resource states fetched from APIs.
+
+[Back to Index](../state_management_interview_questions.md#easy-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#easy-6-what-is-the-difference-between-ephemeral-local-state-and-app-shared-state)
+
+### Easy 7. What is the purpose of `InheritedWidget` in Flutter?
+
+`InheritedWidget` is the built-in, low-level foundation class in Flutter that allows data to propagate down the widget tree to descendant widgets without constructor parameters.
+
+#### How it works
+1. **Propagation:** When you query `InheritedWidget.of(context)` inside a child widget, Flutter registers that child widget as a listener.
+2. **Rebuilding:** If the `InheritedWidget` is rebuilt with new data, it decides whether to notify its listeners by executing its `updateShouldNotify` callback.
+3. **Execution:** If `updateShouldNotify` returns `true`, Flutter automatically triggers a rebuild (`didChangeDependencies` and `build`) of all descendants registered as listeners.
+
+```dart
+class MyTheme extends InheritedWidget {
+  final Color primaryColor;
+  const MyTheme({required this.primaryColor, required Widget child}) : super(child: child);
+
+  static MyTheme? of(BuildContext context) => 
+      context.dependOnInheritedWidgetOfExactType<MyTheme>();
+
+  @override
+  bool updateShouldNotify(MyTheme oldWidget) => primaryColor != oldWidget.primaryColor;
+}
+```
+
+#### Why we use frameworks
+Writing manual `InheritedWidgets` is tedious and boiler-heavy. Frameworks like `Provider` and `Riverpod` wrap `InheritedWidget` to give developers clean APIs, automatic dependency injection, and advanced caching controls.
+
+[Back to Index](../state_management_interview_questions.md#easy-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#easy-7-what-is-the-purpose-of-inheritedwidget-in-flutter)
+
 ## Medium Questions
 
 ### Medium 1. Differentiate between ChangeNotifier, ValueNotifier, and StateNotifier.
@@ -243,6 +294,49 @@ Connecting a BLoC/Cubit to the context offers different ways to consume state, a
 - **Result:** Ideal for side effects like navigation, displaying SnackBar alerts, or showing overlays.
 
 [Back to Index](../state_management_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#medium-7-what-is-the-difference-between-watch-and-listen-in-bloc-contextwatch-vs-contextselect-vs-bloclistener)
+
+### Medium 8. What is the difference between `ref.watch` and `ref.read` in Riverpod, and why should you never use `ref.read` inside a `build` method?
+
+In Riverpod, interacting with providers requires using `WidgetRef` (commonly named `ref`). The distinction between how you retrieve states is critical to application stability:
+
+#### `ref.watch` (Reactive Subscriptions)
+- **Behavior:** Reads the current value of the provider and registers the calling widget to listen to updates.
+- **Use Case:** Always use in the `build(context, ref)` method of `ConsumerWidget` or inside provider bodies when you want the UI/state to update reactively.
+
+#### `ref.read` (One-time Snapshots)
+- **Behavior:** Reads the current value of the provider once, *without* registering any listener. It is completely blind to future state updates.
+- **Use Case:** Inside action callbacks (like a button's `onPressed` handler) to invoke logic (e.g. `ref.read(authProvider.notifier).login()`).
+
+#### Why `ref.read` in `build` is an Anti-Pattern
+If you retrieve state in a `build` method using `ref.read`, the widget will render successfully with the initial value, but it will never rebuild when the state changes. This causes silent UI bugs where the screen data becomes stale and out-of-sync with the real app state.
+
+[Back to Index](../state_management_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#medium-8-what-is-the-difference-between-refwatch-and-refread-in-riverpod-and-why-should-you-never-use-refread-inside-a-build-method)
+
+### Medium 9. How does BLoC's `BlocSelector` differ from `BlocBuilder`, and when should you use it?
+
+Both widgets are used to consume states emitted by a Bloc or Cubit, but they target different rebuild scopes:
+
+#### `BlocBuilder`
+- **Mechanism:** Listens to the entire state object emitted by a Bloc.
+- **Behavior:** Rebuilds its child widget subtree whenever *any* property inside the state changes.
+- **Drawback:** In complex monolithic state classes, updating an unrelated field (e.g., ticking a timer) triggers rebuilds on components that only depend on static fields, degrading rendering performance.
+
+#### `BlocSelector`
+- **Mechanism:** Selects a specific property or slice of the state.
+- **Behavior:** Rebuilds *only* when the selected value changes. It ignores all other state transitions.
+
+```dart
+// Rebuilds only when user name changes, ignoring other profile updates
+BlocSelector<ProfileBloc, ProfileState, String>(
+  selector: (state) => state.userName,
+  builder: (context, userName) => Text(userName),
+)
+```
+
+#### When to use it
+Use `BlocSelector` on high-traffic screens or heavy widget trees to filter updates, minimize widget rebuild paths, and maintain 60/120 FPS paint cycles.
+
+[Back to Index](../state_management_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#medium-9-how-does-blocs-blocselector-differ-from-blocbuilder-and-when-should-you-use-it)
 
 ## Hard Questions
 
@@ -445,4 +539,95 @@ final profileProvider = FutureProvider.autoDispose<Profile>((ref) async {
 Normally, static providers (without `autoDispose`) stay in memory forever. `autoDispose` with `keepAlive` gives you dynamic cache control: the provider starts auto-disposing, but you can dynamically freeze it in memory once a successful state is reached.
 
 [Back to Index](../state_management_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#hard-8-explain-how-riverpods-refkeepalive-or-keepalivelink-works-and-how-it-differs-from-the-default-caching-behavior-of-autodispose)
+
+### Hard 9. How do you unit test state classes in BLoC using the `bloc_test` package?
+
+Unit testing BLoCs is highly structured. Instead of manual stream listening, the industry standard is to use the `blocTest` helper from the `bloc_test` package to verify state sequences.
+
+#### Test Implementation
+1. Mock any database or API dependencies (e.g., using `mocktail` or `mockito`).
+2. Write a `blocTest` block.
+3. Configure three parameters:
+   - `build`: Instantiates the BLoC with mocked dependencies.
+   - `act`: Injects events or invokes actions to trigger state changes.
+   - `expect`: Asserts the exact chronological order of emitted states.
+
+```dart
+import 'package:bloc_test/bloc_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+class MockUserRepository extends Mock implements UserRepository {}
+
+void main() {
+  late MockUserRepository mockRepository;
+
+  setUp(() {
+    mockRepository = MockUserRepository();
+  });
+
+  blocTest<AuthBloc, AuthState>(
+    'emits [AuthLoading, AuthAuthenticated] when LoginEvent succeeds',
+    build: () {
+      when(() => mockRepository.login('user', 'pass')).thenAnswer((_) async => User('Naresh'));
+      return AuthBloc(userRepository: mockRepository);
+    },
+    act: (bloc) => bloc.add(const LoginEvent(username: 'user', password: 'pass')),
+    expect: () => [
+      const AuthLoading(),
+      const AuthAuthenticated(User('Naresh')),
+    ],
+  );
+}
+```
+
+[Back to Index](../state_management_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#hard-9-how-do-you-unit-test-state-classes-in-bloc-using-the-bloc_test-package)
+
+---
+
+### Hard 10. How do you unit test providers in Riverpod without rendering UI widgets?
+
+Unit testing Riverpod providers should be done in isolation without instantiating Flutter widgets. You do this by creating a standalone `ProviderContainer`.
+
+#### Test Implementation Flow
+1. Create a `ProviderContainer` (with optional dependency overrides).
+2. Read the initial state of your provider.
+3. Perform actions on the provider's notifier.
+4. Verify the updated state of the provider.
+5. Dispose of the container at the end of the test to release mock subscriptions.
+
+```dart
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockWeatherService extends Mock implements WeatherService {}
+
+void main() {
+  test('weatherNotifier fetches data successfully', () async {
+    final mockService = MockWeatherService();
+    when(() => mockService.fetchTemp()).thenAnswer((_) async => 22);
+
+    // 1. Create a standalone container with overrides
+    final container = ProviderContainer(
+      overrides: [
+        weatherServiceProvider.overrideWithValue(mockService),
+      ],
+    );
+    addTearDown(container.dispose); // 5. Auto-cleanup
+
+    // 2. Read initial state (AsyncValue.loading)
+    expect(container.read(weatherNotifierProvider), const AsyncValue<int>.loading());
+
+    // 3. Wait for async task to complete
+    await container.read(weatherNotifierProvider.future);
+
+    // 4. Verify output state
+    expect(container.read(weatherNotifierProvider).value, 22);
+  });
+}
+```
+
+[Back to Index](../state_management_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#hard-10-how-do-you-unit-test-providers-in-riverpod-without-rendering-ui-widgets)
+
 

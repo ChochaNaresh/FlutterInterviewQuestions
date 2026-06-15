@@ -22,6 +22,18 @@ This guide contains quick-revision answers for 15 Builder & Code Generation inte
 
 [Back to Index](../builder_interview_questions.md#easy-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#easy-3-what-is-the-purpose-of-the-json_serializable-package)
 
+### Easy 4. What is the difference between `part` and `import` directives in Dart?
+
+*`import` loads another file/library into a separate namespace without access to its private members. `part` and `part of` split a single library across multiple physical files, allowing both files to access each other's private fields (required for generated part files).*
+
+[Back to Index](../builder_interview_questions.md#easy-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#easy-4-what-is-the-difference-between-part-and-import-directives-in-dart)
+
+### Easy 5. What are annotations in Dart and how are they used in code generation?
+
+*Annotations are compile-time metadata markers (prefixed with `@`) that tag elements (classes, variables, constructors). Build tools scan for these annotations at build time to generate corresponding boilerplate helper classes.*
+
+[Back to Index](../builder_interview_questions.md#easy-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#easy-5-what-are-annotations-in-dart-and-how-are-they-used-in-code-generation)
+
 ## Medium Questions
 
 ### Medium 1. How do you run the code generator and what is the difference between build and watch commands?
@@ -63,6 +75,20 @@ This guide contains quick-revision answers for 15 Builder & Code Generation inte
 *Set `@JsonSerializable(genericArgumentFactories: true)`. This generates mapping functions that accept callbacks (like `fromJsonT`) to handle generic variables during serialization.*
 
 [Back to Index](../builder_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#medium-6-how-do-you-serialize-deserialize-generic-models-using-json_serializable)
+
+### Medium 7. Should generated files (e.g., .g.dart and .freezed.dart) be committed to Git?
+
+*Standard industry practice is to add generated files to `.gitignore` to keep pull requests clean and avoid merge conflicts. However, committing them speeds up CI/CD pipeline runs and ensures onboarding developers can run the project immediately without running build runner.*
+
+[Back to Index](../builder_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#medium-7-should-generated-files-eg-gdart-and-freezeddart-be-committed-to-git)
+
+---
+
+### Medium 8. What is the purpose of @JsonValue and how does it differ from @JsonKey?
+
+*`@JsonKey` is used on class fields to customize serialization properties (naming, default value, converter). `@JsonValue` is used on individual enum cases to define the exact string or integer value sent/received during serialization.*
+
+[Back to Index](../builder_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#medium-8-what-is-the-purpose-of-jsonvalue-and-how-does-it-differ-from-jsonkey)
 
 ## Hard Questions
 
@@ -107,4 +133,18 @@ This guide contains quick-revision answers for 15 Builder & Code Generation inte
 *Implement the Discriminator Pattern. Inspect a type key (like `type: 'dog'`) in a custom factory on the parent class, then delegate `fromJson` instantiation to the appropriate generated subclass serializer.*
 
 [Back to Index](../builder_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#hard-6-how-do-you-handle-class-inheritance-or-polymorphic-classes-when-serializing-deserializing-json-using-json_serializable)
+
+### Hard 7. How do you create a custom code generator in Dart using the `source_gen` and `build` packages?
+
+*Create an annotation class, implement a custom `Generator` subclass that analyzes code elements and returns string patterns, register the generator via a `Builder` helper, and map it in a root `build.yaml` file to automate execution.*
+
+[Back to Index](../builder_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#hard-7-how-do-you-create-a-custom-code-generator-in-dart-using-the-source_gen-and-build-packages)
+
+---
+
+### Hard 8. How does `build_runner` handle incremental compilation, and what is the role of `build.yaml`'s `build_to: cache` vs `build_to: source`?
+
+*Incremental builds compile only modified files based on file hashes. `build_to: cache` writes output files to a hidden compiler directory (clean workspace). `build_to: source` writes generated files directly into the `lib/` directory next to original sources (required for parts).*
+
+[Back to Index](../builder_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#hard-8-how-does-build_runner-handle-incremental-compilation-and-what-is-the-role-of-buildyamls-build_to-cache-vs-build_to-source)
 

@@ -1,6 +1,6 @@
 # Flutter & Dart Interview Questions Guide
 
-Welcome to the consolidated Flutter and Dart Interview Questions repository! This resource is designed to help you prepare for technical interviews, featuring **221 total questions** across six subjects (113 Flutter, 45 Dart, 20 State Management, 16 Builder & Code Generation, 15 Platform Integration, and 12 App Deployment & Notifications).
+Welcome to the consolidated Flutter and Dart Interview Questions repository! This resource is designed to help you prepare for technical interviews, featuring **232 total questions** across six subjects (113 Flutter, 45 Dart, 26 State Management, 21 Builder & Code Generation, 15 Platform Integration, and 12 App Deployment & Notifications).
 
 All answers have been simplified and rewritten in clear, natural, native English, making them easy to read, print, and study.
 
