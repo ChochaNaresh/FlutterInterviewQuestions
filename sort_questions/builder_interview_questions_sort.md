@@ -1,6 +1,6 @@
 # Builder & Code Generation Interview Questions - Quick Revision
 
-This guide contains quick-revision answers for 10 Builder & Code Generation interview questions.
+This guide contains quick-revision answers for 15 Builder & Code Generation interview questions.
 
 ## Easy Questions
 
@@ -48,6 +48,22 @@ This guide contains quick-revision answers for 10 Builder & Code Generation inte
 
 [Back to Index](../builder_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#medium-4-how-do-you-handle-default-values-for-properties-in-a-freezed-class)
 
+---
+
+### Medium 5. How does freezed handle Custom Getters, Setters, or Methods inside an annotated class?
+
+*To add custom getters or methods in a `freezed` class, you must declare a private empty constructor (`const MyClass._();`) inside the class body. This allows writing normal helper logic.*
+
+[Back to Index](../builder_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#medium-5-how-does-freezed-handle-custom-getters-setters-or-methods-inside-an-annotated-class)
+
+---
+
+### Medium 6. How do you serialize/deserialize generic models (like a generic PaginatedResponse<T>) using json_serializable?
+
+*Set `@JsonSerializable(genericArgumentFactories: true)`. This generates mapping functions that accept callbacks (like `fromJsonT`) to handle generic variables during serialization.*
+
+[Back to Index](../builder_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#medium-6-how-do-you-serialize-deserialize-generic-models-using-json_serializable)
+
 ## Hard Questions
 
 ### Hard 1. Explain union/sealed classes in freezed and how they facilitate type-safe state transitions.
@@ -67,3 +83,28 @@ This guide contains quick-revision answers for 10 Builder & Code Generation inte
 *`build_runner` caches code outputs in `.dart_tool/build/`. Resolve build blocks by running with the `--delete-conflicting-outputs` flag. For persistent issues, run `build_runner clean` followed by a fresh rebuild.*
 
 [Back to Index](../builder_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#hard-3-how-does-build_runner-manage-caching-and-how-do-you-resolve-builder-conflicts-or-build-failures)
+
+---
+
+### Hard 4. Explain how to write custom build options in a build.yaml file to exclude files or configure specific builders globally.
+
+*Create a `build.yaml` file in the project root. Under `builders`, specify parser options (like `field_rename` globally) and use the `exclude` key to block folders from compiler scans.*
+
+[Back to Index](../builder_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#hard-4-explain-how-to-write-custom-build-options-in-a-buildyaml-file-to-exclude-files-or-configure-specific-builders-globally)
+
+---
+
+### Hard 5. Explain the performance difference between generated code vs reflection (such as mirrors API in Dart) for JSON parsing.
+
+*Reflection runs dynamically at runtime, slowing execution and preventing tree-shaking (resulting in bloated app sizes). Codegen generates static mapping code at build-time, maintaining high AOT performance and small binaries.*
+
+[Back to Index](../builder_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#hard-5-explain-the-performance-difference-between-generated-code-vs-reflection-for-json-parsing)
+
+---
+
+### Hard 6. How do you handle class inheritance or polymorphic classes when serializing/deserializing JSON using json_serializable?
+
+*Implement the Discriminator Pattern. Inspect a type key (like `type: 'dog'`) in a custom factory on the parent class, then delegate `fromJson` instantiation to the appropriate generated subclass serializer.*
+
+[Back to Index](../builder_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/builder_interview_questions.md#hard-6-how-do-you-handle-class-inheritance-or-polymorphic-classes-when-serializing-deserializing-json-using-json_serializable)
+

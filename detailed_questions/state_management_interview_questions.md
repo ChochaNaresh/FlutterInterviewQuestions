@@ -1,6 +1,6 @@
 # State Management Interview Questions - Detailed Explanations
 
-This guide contains detailed answers, code examples, and trade-offs for 15 State Management interview questions.
+This guide contains detailed answers, code examples, and trade-offs for 20 State Management interview questions.
 
 ## Easy Questions
 
@@ -185,6 +185,65 @@ final username = context.select<UserProfile, String>((profile) => profile.userna
 
 [Back to Index](../state_management_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#medium-5-what-is-the-purpose-of-using-selectors-in-provider)
 
+---
+
+### Medium 6. How do you handle authentication state changes and auto-redirection in Riverpod vs BLoC?
+
+Managing navigation redirects based on authentication (e.g., sending users to Login when logged out) requires listening to authentication state change streams.
+
+#### BLoC Approach
+In BLoC, you wrap your router configuration or app root with a `BlocListener` that listens to `AuthenticationBloc`. When the state transition matches `Unauthenticated`, you trigger the router (e.g., GoRouter or Navigator) to push/redirect.
+
+```dart
+BlocListener<AuthBloc, AuthState>(
+  listener: (context, state) {
+    if (state is Unauthenticated) {
+      context.go('/login');
+    }
+  },
+  child: ChildWidget(),
+)
+```
+
+#### Riverpod Approach
+With Riverpod, you can listen to a state provider directly inside a GoRouter redirect configuration using `ref.read` and listening mechanisms, or watch the provider inside the router class:
+
+```dart
+final routerProvider = Provider<GoRouter>((ref) {
+  final authState = ref.watch(authProvider);
+  return GoRouter(
+    redirect: (context, state) {
+      final loggedIn = authState.value != null;
+      if (!loggedIn) return '/login';
+      return null;
+    },
+    // routes...
+  );
+});
+```
+
+[Back to Index](../state_management_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#medium-6-how-do-you-handle-authentication-state-changes-and-auto-redirection-in-riverpod-vs-bloc)
+
+---
+
+### Medium 7. What is the difference between watch and listen in BLoC (context.watch vs context.select vs BlocListener)?
+
+Connecting a BLoC/Cubit to the context offers different ways to consume state, affecting how and when a widget rebuilds.
+
+#### 1. `context.watch<MyBloc>()`
+- **Behavior:** Subscribes the widget to the entire state of `MyBloc`.
+- **Result:** The widget's `build` method triggers *every* time any variable in the state class changes.
+
+#### 2. `context.select<MyBloc, SelectedType>((bloc) => ...)`
+- **Behavior:** Subscribes only to a specific sub-field or slice of the state.
+- **Result:** Rebuilds the widget only when that selected property changes, preventing redundant rendering.
+
+#### 3. `BlocListener` (listen)
+- **Behavior:** Does not rebuild the widget. Instead, it triggers a callback *once* per state change.
+- **Result:** Ideal for side effects like navigation, displaying SnackBar alerts, or showing overlays.
+
+[Back to Index](../state_management_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#medium-7-what-is-the-difference-between-watch-and-listen-in-bloc-contextwatch-vs-contextselect-vs-bloclistener)
+
 ## Hard Questions
 
 ### Hard 1. How does Riverpod solve the design flaws and limitations of the original Provider package?
@@ -284,3 +343,106 @@ When designing state management architectures, deciding the size of state classe
 - **Result:** Minimized widget rebuild paths, higher paint frame rates, and cleaner code modularity.
 
 [Back to Index](../state_management_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#hard-5-what-are-the-performance-implications-of-storing-huge-state-objects-vs-granular-state-slices)
+
+---
+
+### Hard 6. Explain the difference between BLoC's emit and emit.isClosed check, and why omitting it in async blocks causes memory leaks.
+
+When using BLoC, state changes are performed using the `emit` function. However, using `emit` blindly within asynchronous blocks can lead to crashes and memory leaks.
+
+#### The Problem
+If a Bloc is closed (disposed) while an asynchronous operation (like an HTTP fetch) is still pending, the context of the event handler is destroyed. When the async operation completes and calls `emit(State())`, Dart throws a `StateError` because you cannot emit states on a closed controller.
+
+```dart
+// Dangerous code
+on<FetchData>((event, emit) async {
+  final data = await api.getData();
+  emit(DataLoaded(data)); // Will crash if widget/bloc disposed during await
+});
+```
+
+#### The Solution: emit.isClosed
+Check the controller's active status using `isClosed` before executing `emit` inside async callbacks:
+
+```dart
+on<FetchData>((event, emit) async {
+  final data = await api.getData();
+  if (isClosed) return; // Prevent crashes and resource leaks
+  emit(DataLoaded(data));
+});
+```
+
+[Back to Index](../state_management_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#hard-6-explain-the-difference-between-blocs-emit-and-emitisclosed-check-and-why-omitting-it-in-async-blocks-causes-memory-leaks)
+
+---
+
+### Hard 7. How do you implement offline caching and hydration of state in Riverpod and BLoC?
+
+Offline caching ensures that when users launch the app, state is instantly loaded from local storage before any API call executes.
+
+#### BLoC Approach (HydratedBloc)
+The BLoC library includes `hydrated_bloc` to automatically read/write state configurations using local storage (Hive).
+- Define a class extending `HydratedBloc`.
+- Override `fromJson` to deserialize local state.
+- Override `toJson` to serialize state updates automatically.
+
+```dart
+class ThemeBloc extends HydratedBloc<ThemeEvent, ThemeState> {
+  // state serialization and parsing overrides...
+  @override
+  ThemeState? fromJson(Map<String, dynamic> json) => ThemeState(json['dark'] as bool);
+  @override
+  Map<String, dynamic>? toJson(ThemeState state) => {'dark': state.isDark};
+}
+```
+
+#### Riverpod Approach
+In Riverpod, you can listen to a state notifier and dump updates to local storage (like `shared_preferences` or `Isar`). Alternatively, you can use packages like `riverpod_annotation` along with local persistence checks inside the notifier's initializer:
+
+```dart
+@riverpod
+class Settings extends _$Settings {
+  @override
+  SettingsState build() {
+    final cached = localPrefs.getString('settings');
+    if (cached != null) return parseState(cached);
+    return const SettingsState.defaultVal();
+  }
+
+  void toggleTheme() {
+    state = state.copyWith(dark: !state.dark);
+    localPrefs.setString('settings', serializeState(state));
+  }
+}
+```
+
+[Back to Index](../state_management_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#hard-7-how-do-you-implement-offline-caching-and-hydration-of-state-in-riverpod-and-bloc)
+
+---
+
+### Hard 8. Explain how Riverpod's ref.keepAlive() (or KeepAliveLink) works and how it differs from the default caching behavior of autoDispose.
+
+By default, an `autoDispose` provider is instantly destroyed as soon as no widgets are actively watching it.
+
+#### What keepAlive does
+`ref.keepAlive()` overrides this behavior, forcing the provider's state to remain in memory even when it has zero listeners.
+
+#### Typical Use Case
+Caching API request data. You want the provider to clean up memory if the user navigates away *unless* the data was fetched successfully. If the fetch was successful, keep it in cache:
+
+```dart
+final profileProvider = FutureProvider.autoDispose<Profile>((ref) async {
+  final data = await fetchProfile();
+  
+  // Keep the cached profile in memory once fetched successfully
+  ref.keepAlive();
+  
+  return data;
+});
+```
+
+#### How it differs from standard caching
+Normally, static providers (without `autoDispose`) stay in memory forever. `autoDispose` with `keepAlive` gives you dynamic cache control: the provider starts auto-disposing, but you can dynamically freeze it in memory once a successful state is reached.
+
+[Back to Index](../state_management_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/state_management_interview_questions_sort.md#hard-8-explain-how-riverpods-refkeepalive-or-keepalivelink-works-and-how-it-differs-from-the-default-caching-behavior-of-autodispose)
+

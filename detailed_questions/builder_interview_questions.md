@@ -1,6 +1,6 @@
 # Builder & Code Generation Interview Questions - Detailed Explanations
 
-This guide contains detailed answers, code examples, and trade-offs for 10 Builder & Code Generation interview questions.
+This guide contains detailed answers, code examples, and trade-offs for 15 Builder & Code Generation interview questions.
 
 ## Easy Questions
 
@@ -140,6 +140,67 @@ class UserState with _$UserState {
 
 [Back to Index](../builder_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#medium-4-how-do-you-handle-default-values-for-properties-in-a-freezed-class)
 
+---
+
+### Medium 5. How does freezed handle Custom Getters, Setters, or Methods inside an annotated class?
+
+By default, `freezed` classes use redirecting factories (`factory MyClass(...) = _MyClass;`), which prevents you from writing custom properties or methods directly in the class body.
+
+#### The Solution
+To add custom getters, setters, or helper methods:
+1. Define a private, empty constructor in the class (`const MyClass._();`).
+2. Write your custom methods or getters inside the class body.
+
+```dart
+@freezed
+class UserState with _$UserState {
+  // 1. Required private constructor
+  const UserState._();
+
+  const factory UserState({
+    required String firstName,
+    required String lastName,
+  }) = _UserState;
+
+  // 2. Custom helper getter
+  String get fullName => '$firstName $lastName';
+}
+```
+
+[Back to Index](../builder_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#medium-5-how-does-freezed-handle-custom-getters-setters-or-methods-inside-an-annotated-class)
+
+---
+
+### Medium 6. How do you serialize/deserialize generic models (like a generic PaginatedResponse<T>) using json_serializable?
+
+Serializing classes containing generic parameters requires special config because Dart does not preserve generic type variables at runtime.
+
+#### The Solution
+Configure `@JsonSerializable` to generate generic argument factories:
+1. Set `genericArgumentFactories: true` in the class annotation.
+2. Accept helper mapping functions in the `fromJson` and `toJson` constructor declarations.
+
+```dart
+@JsonSerializable(genericArgumentFactories: true)
+class PaginatedResponse<T> {
+  final List<T> data;
+  final int total;
+
+  PaginatedResponse(this.data, this.total);
+
+  factory PaginatedResponse.fromJson(
+    Map<String, dynamic> json,
+    T Function(Object? json) fromJsonT, // Mapping function for T
+  ) =>
+      _$PaginatedResponseFromJson(json, fromJsonT);
+
+  Map<String, dynamic> toJson(Object? Function(T value) toJsonT) =>
+      _$PaginatedResponseToJson(this, toJsonT);
+}
+```
+
+[Back to Index](../builder_interview_questions.md#medium-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#medium-6-how-do-you-serialize-deserialize-generic-models-using-json_serializable)
+
 ## Hard Questions
 
 ### Hard 1. Explain union/sealed classes in freezed and how they facilitate type-safe state transitions.
@@ -217,3 +278,93 @@ class EventLog {
    ```
 
 [Back to Index](../builder_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#hard-3-how-does-build_runner-manage-caching-and-how-do-you-resolve-builder-conflicts-or-build-failures)
+
+---
+
+### Hard 4. Explain how to write custom build options in a build.yaml file to exclude files or configure specific builders globally.
+
+The `build.yaml` file configures the execution properties of `build_runner` code generators globally.
+
+#### Use Case: Global Key Formatting in `json_serializable`
+Instead of adding `fieldRename` to every class, configure it globally:
+
+```yaml
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # Convert camelCase fields to snake_case in all JSON output files
+          field_rename: snake
+          checked: true # Adds type safety validation during JSON parsing
+```
+
+#### Use Case: Excluding Specific Files
+To speed up builds, exclude specific folders (like test mocks or temporary directories) from code generation:
+
+```yaml
+targets:
+  $default:
+    sources:
+      exclude:
+        - "lib/temp/**"
+        - "test/mocks/**"
+```
+
+[Back to Index](../builder_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#hard-4-explain-how-to-write-custom-build-options-in-a-buildyaml-file-to-exclude-files-or-configure-specific-builders-globally)
+
+---
+
+### Hard 5. Explain the performance difference between generated code vs reflection (such as mirrors API in Dart) for JSON parsing.
+
+Many languages (like Java/Kotlin) parse JSON at runtime using **reflection** (inspecting classes dynamically). Flutter does not allow reflection because Dart disables `dart:mirrors` in flutter builds.
+
+#### Reflection
+- **Mechanism:** Inspects class meta-information at runtime to map JSON fields dynamically.
+- **Drawback:** Prevents the compiler from identifying unused code during build. Since the compiler doesn't know which class properties are inspected, it cannot tree-shake classes, resulting in bloated binaries. It also causes performance slowdowns on lower-end mobile devices.
+
+#### Generated Code (Codegen)
+- **Mechanism:** Creates static Dart code during compile-time. Mappings are plain, direct assignments (`name = json['name']`).
+- **Benefit:** Full compatibility with **AOT compilation** and **tree shaking**. The compiler knows exactly which fields are used and discards dead code. Mappings execute at compile-time performance with zero reflection overhead.
+
+[Back to Index](../builder_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#hard-5-explain-the-performance-difference-between-generated-code-vs-reflection-for-json-parsing)
+
+---
+
+### Hard 6. How do you handle class inheritance or polymorphic classes when serializing/deserializing JSON using json_serializable?
+
+`json_serializable` cannot handle polymorphic class parsing out of the box because it does not know which subclass to instantiate based on JSON values.
+
+#### The Solution: Discriminator Pattern
+Use a type key (discriminator) in your JSON payload and write a manual parsing wrapper.
+1. Define a base class and subclasses.
+2. In the base class `fromJson` factory, inspect the discriminator key and delegate parsing to the correct subclass.
+
+```dart
+abstract class Animal {
+  final String type;
+  Animal(this.type);
+
+  factory Animal.fromJson(Map<String, dynamic> json) {
+    switch (json['type']) {
+      case 'dog':
+        return Dog.fromJson(json);
+      case 'cat':
+        return Cat.fromJson(json);
+      default:
+        throw Exception('Unknown animal type');
+    }
+  }
+}
+
+@JsonSerializable()
+class Dog extends Animal {
+  final String breed;
+  Dog(this.breed) : super('dog');
+
+  factory Dog.fromJson(Map<String, dynamic> json) => _$DogFromJson(json);
+}
+```
+
+[Back to Index](../builder_interview_questions.md#hard-questions) | [Quick Revision](../sort_questions/builder_interview_questions_sort.md#hard-6-how-do-you-handle-class-inheritance-or-polymorphic-classes-when-serializing-deserializing-json-using-json_serializable)
+

@@ -1,6 +1,6 @@
 # State Management Interview Questions - Quick Revision
 
-This guide contains quick-revision answers for 15 State Management interview questions.
+This guide contains quick-revision answers for 20 State Management interview questions.
 
 ## Easy Questions
 
@@ -66,6 +66,22 @@ This guide contains quick-revision answers for 15 State Management interview que
 
 [Back to Index](../state_management_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#medium-5-what-is-the-purpose-of-using-selectors-in-provider)
 
+---
+
+### Medium 6. How do you handle authentication state changes and auto-redirection in Riverpod vs BLoC?
+
+*In BLoC, use a `BlocListener` to listen to state transitions and trigger navigation imperatively when state changes. In Riverpod, inject the auth provider directly into GoRouter's redirect logic to recalculate routes reactively when the auth state updates.*
+
+[Back to Index](../state_management_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#medium-6-how-do-you-handle-authentication-state-changes-and-auto-redirection-in-riverpod-vs-bloc)
+
+---
+
+### Medium 7. What is the difference between watch and listen in BLoC (context.watch vs context.select vs BlocListener)?
+
+*`context.watch` rebuilds the widget on any state change. `context.select` targets rebuilds to specific state slices. `BlocListener` executes side-effect callbacks (such as alerts or navigation) without rebuilding the UI.*
+
+[Back to Index](../state_management_interview_questions.md#medium-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#medium-7-what-is-the-difference-between-watch-and-listen-in-bloc-contextwatch-vs-contextselect-vs-bloclistener)
+
 ## Hard Questions
 
 ### Hard 1. How does Riverpod solve the design flaws and limitations of the original Provider package?
@@ -97,3 +113,28 @@ This guide contains quick-revision answers for 15 State Management interview que
 *Monolithic states cause massive, redundant widget rebuilds across the app when small variables change. Granular state slices isolate state modifications, rebuilding only the exact UI consumer component to optimize layout passes.*
 
 [Back to Index](../state_management_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#hard-5-what-are-the-performance-implications-of-storing-huge-state-objects-vs-granular-state-slices)
+
+---
+
+### Hard 6. Explain the difference between BLoC's emit and emit.isClosed check, and why omitting it in async blocks causes memory leaks.
+
+*Emitting state on a disposed Bloc throws a runtime crash. Checking `isClosed` (or checking if the handler is active) prevents executing code on a disposed controller, resolving memory leaks and async race-conditions.*
+
+[Back to Index](../state_management_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#hard-6-explain-the-difference-between-blocs-emit-and-emitisclosed-check-and-why-omitting-it-in-async-blocks-causes-memory-leaks)
+
+---
+
+### Hard 7. How do you implement offline caching and hydration of state in Riverpod and BLoC?
+
+*In BLoC, inherit from `HydratedBloc` which automates Hive-based serialization. In Riverpod, load cached data synchronously in your notifier's `build()` method, and save updates to local storage inside mutations.*
+
+[Back to Index](../state_management_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#hard-7-how-do-you-implement-offline-caching-and-hydration-of-state-in-riverpod-and-bloc)
+
+---
+
+### Hard 8. Explain how Riverpod's ref.keepAlive() (or KeepAliveLink) works and how it differs from the default caching behavior of autoDispose.
+
+*`ref.keepAlive()` preserves an `autoDispose` provider's state in memory when it loses all listeners. This allows you to caching successful API payloads dynamically while discarding loading/failed request states.*
+
+[Back to Index](../state_management_interview_questions.md#hard-questions) | [Detailed Explanation](../detailed_questions/state_management_interview_questions.md#hard-8-explain-how-riverpods-refkeepalive-or-keepalivelink-works-and-how-it-differs-from-the-default-caching-behavior-of-autodispose)
+
