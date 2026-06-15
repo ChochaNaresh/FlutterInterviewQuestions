@@ -1,0 +1,33 @@
+# State Management Interview Questions
+
+This guide contains a consolidated list of 15 State Management interview questions and answers. Select a question below to read the detailed guide or the quick-revision companion.
+
+## Easy Questions
+
+| No. | Question | Category | Detailed Guide | Quick Revision |
+|---|---|---|---|---|
+| 1 | What is the main purpose of state management in Flutter? | Basics | [Detailed Guide](detailed_questions/state_management_interview_questions.md#easy-1-what-is-the-main-purpose-of-state-management-in-flutter) | [Quick View](sort_questions/state_management_interview_questions_sort.md#easy-1-what-is-the-main-purpose-of-state-management-in-flutter) |
+| 2 | What is the difference between setState and global state management libraries? | Basics | [Detailed Guide](detailed_questions/state_management_interview_questions.md#easy-2-what-is-the-difference-between-setstate-and-global-state-management-libraries) | [Quick View](sort_questions/state_management_interview_questions_sort.md#easy-2-what-is-the-difference-between-setstate-and-global-state-management-libraries) |
+| 3 | What is the Provider package and how does ChangeNotifierProvider work? | Provider | [Detailed Guide](detailed_questions/state_management_interview_questions.md#easy-3-what-is-the-provider-package-and-how-does-changenotifierprovider-work) | [Quick View](sort_questions/state_management_interview_questions_sort.md#easy-3-what-is-the-provider-package-and-how-does-changenotifierprovider-work) |
+| 4 | What is the difference between a Bloc and a Cubit in the BLoC library? | BLoC | [Detailed Guide](detailed_questions/state_management_interview_questions.md#easy-4-what-is-the-difference-between-a-bloc-and-a-cubit-in-the-bloc-library) | [Quick View](sort_questions/state_management_interview_questions_sort.md#easy-4-what-is-the-difference-between-a-bloc-and-a-cubit-in-the-bloc-library) |
+| 5 | What is the ProviderScope widget in Riverpod and why is it required? | Riverpod | [Detailed Guide](detailed_questions/state_management_interview_questions.md#easy-5-what-is-the-providerscope-widget-in-riverpod-and-why-is-it-required) | [Quick View](sort_questions/state_management_interview_questions_sort.md#easy-5-what-is-the-providerscope-widget-in-riverpod-and-why-is-it-required) |
+
+## Medium Questions
+
+| No. | Question | Category | Detailed Guide | Quick Revision |
+|---|---|---|---|---|
+| 1 | Differentiate between ChangeNotifier, ValueNotifier, and StateNotifier. | Basics | [Detailed Guide](detailed_questions/state_management_interview_questions.md#medium-1-differentiate-between-changenotifier-valuenotifier-and-statenotifier) | [Quick View](sort_questions/state_management_interview_questions_sort.md#medium-1-differentiate-between-changenotifier-valuenotifier-and-statenotifier) |
+| 2 | In Riverpod, when should you use ref.watch, ref.read, and ref.listen? | Riverpod | [Detailed Guide](detailed_questions/state_management_interview_questions.md#medium-2-in-riverpod-when-should-you-use-refwatch-refread-and-reflisten) | [Quick View](sort_questions/state_management_interview_questions_sort.md#medium-2-in-riverpod-when-should-you-use-refwatch-refread-and-reflisten) |
+| 3 | Differentiate between ConsumerWidget, ConsumerStatefulWidget, and Consumer. | Riverpod | [Detailed Guide](detailed_questions/state_management_interview_questions.md#medium-3-differentiate-between-consumerwidget-consumerstatefulwidget-and-consumer) | [Quick View](sort_questions/state_management_interview_questions_sort.md#medium-3-differentiate-between-consumerwidget-consumerstatefulwidget-and-consumer) |
+| 4 | Differentiate between BlocBuilder, BlocListener, BlocConsumer, and BlocProvider. | BLoC | [Detailed Guide](detailed_questions/state_management_interview_questions.md#medium-4-differentiate-between-blocbuilder-bloclistener-blocconsumer-and-blocprovider) | [Quick View](sort_questions/state_management_interview_questions_sort.md#medium-4-differentiate-between-blocbuilder-bloclistener-blocconsumer-and-blocprovider) |
+| 5 | What is the purpose of using Selectors (e.g. context.select) in Provider? | Provider | [Detailed Guide](detailed_questions/state_management_interview_questions.md#medium-5-what-is-the-purpose-of-using-selectors-eg-contextselect-in-provider) | [Quick View](sort_questions/state_management_interview_questions_sort.md#medium-5-what-is-the-purpose-of-using-selectors-eg-contextselect-in-provider) |
+
+## Hard Questions
+
+| No. | Question | Category | Detailed Guide | Quick Revision |
+|---|---|---|---|---|
+| 1 | How does Riverpod solve the design flaws and limitations of the original Provider package? | Riverpod | [Detailed Guide](detailed_questions/state_management_interview_questions.md#hard-1-how-does-riverpod-solve-the-design-flaws-and-limitations-of-the-original-provider-package) | [Quick View](sort_questions/state_management_interview_questions_sort.md#hard-1-how-does-riverpod-solve-the-design-flaws-and-limitations-of-the-original-provider-package) |
+| 2 | What is the role of Event Transformers and concurrent event handling in BLoC? | BLoC | [Detailed Guide](detailed_questions/state_management_interview_questions.md#hard-2-what-is-the-role-of-event-transformers-and-concurrent-event-handling-in-bloc) | [Quick View](sort_questions/state_management_interview_questions_sort.md#hard-2-what-is-the-role-of-event-transformers-and-concurrent-event-handling-in-bloc) |
+| 3 | Differentiate between AsyncNotifier, FutureProvider, and StreamProvider in Riverpod. | Riverpod | [Detailed Guide](detailed_questions/state_management_interview_questions.md#hard-3-differentiate-between-asyncnotifier-futureprovider-and-streamprovider-in-riverpod) | [Quick View](sort_questions/state_management_interview_questions_sort.md#hard-3-differentiate-between-asyncnotifier-futureprovider-and-streamprovider-in-riverpod) |
+| 4 | How do you implement global error handling and state tracking using BlocObserver? | BLoC | [Detailed Guide](detailed_questions/state_management_interview_questions.md#hard-4-how-do-you-implement-global-error-handling-and-state-tracking-using-blocobserver) | [Quick View](sort_questions/state_management_interview_questions_sort.md#hard-4-how-do-you-implement-global-error-handling-and-state-tracking-using-blocobserver) |
+| 5 | What are the performance implications of storing huge state objects vs granular state slices? | Basics | [Detailed Guide](detailed_questions/state_management_interview_questions.md#hard-5-what-are-the-performance-implications-of-storing-huge-state-objects-vs-granular-state-slices) | [Quick View](sort_questions/state_management_interview_questions_sort.md#hard-5-what-are-the-performance-implications-of-storing-huge-state-objects-vs-granular-state-slices) |
